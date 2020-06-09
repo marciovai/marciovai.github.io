@@ -26,7 +26,7 @@ description: # this means to ignore newlines until "baseurl:"
   my topics of interest include Machine Learning applied to Computer Graphics 
   and Game Development.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "www.marcioribeiro.cc" # the base hostname & protocol for your site, e.g. http://example.com
+url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: marciovai
 github_username:  marciovai
 
