@@ -21,10 +21,10 @@
 title: Marcio Ribeiro
 email: marcioribp@gmail.com
 description: # this means to ignore newlines until "baseurl:"
-  I'm a Software Engineer and Data Scientist based on São Paulo, Brazil. This
-  blog is a place for me to share ideas and things I've done so far, some of
-  my topics of interest include Machine Learning applied to Computer Graphics,
-  Game Development and Physics.
+  I'm a Software Engineer and Data Scientist based in São Paulo, Brazil. This
+  blog is a place for me to share ideas and things I've done, some of
+  my topics of interest include Machine Learning applied to Computer Graphics 
+  and Game Development.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: marciovai
