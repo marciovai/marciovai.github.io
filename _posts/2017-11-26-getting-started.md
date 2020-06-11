@@ -73,7 +73,6 @@ layout: post
 title: Blog Post with MathJax
 featured-img: sleek # optional - if you want you can include name of hero image
 mathjax: true # add this line in order to enable MathJax in the post
-comments: true
 ---
 ```
 
