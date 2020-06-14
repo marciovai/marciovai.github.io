@@ -2,7 +2,7 @@
 layout: post
 title: This is my first post
 featured-img: sleek
-mathjax: true
+comments: true
 ---
 
 # Hello World!
