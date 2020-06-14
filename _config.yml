@@ -2,8 +2,7 @@
 title: Marcio Ribeiro # your site title
 author: marciovai # You :P
 description: > # Meta description of Homepage
-  Software Engineer and Data Scientist based in São Paulo, Brazil. This
-  blog is a place for me to share ideas and projects.
+  Welcome to my blog!
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
