@@ -4,6 +4,6 @@ title: About
 permalink: /about/
 ---
 
-I have 4 years of experience working with Software Development and Machine Learning applications on both startups and big companies, from being an intern to mentoring others and being my own project manager, I’m always up for new challenges and interesting projects. 
+I'm Software Engineer and Data Scientist based in São Paulo, Brazil. Some of the things I've done in companies I worked in the past include a Recommendation System, Time Series forecasting algorithm for an e-commerce, designing, developing a platform for deploying algorithms and more.  
 
-Here you will find posts about ideas and projects that I've worked on, more on my [Github](https://github.com/marciovai) page.
+More on my [Github](https://github.com/marciovai) page
