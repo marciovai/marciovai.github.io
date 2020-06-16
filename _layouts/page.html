@@ -5,13 +5,7 @@ layout: compress
 <html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
 
   {% include head.html %}
-
-    {% if page.featured-img %}
-    <div class="hero lazyload" data-bg="{{ site.url }}{{ site.baseurl }}/assets/img/posts/{{ page.featured-img }}.jpg">
-    {% else %}
-    <div class="hero dark-bg">
-    {% endif %}
-
+  
   <body class="site">
 
     {% if site.google_tag_manager %}
