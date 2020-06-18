@@ -4,6 +4,6 @@ title: About
 permalink: /about/
 ---
 
-I'm Software Engineer and Data Scientist based in São Paulo, Brazil. Some of the things I've done in companies I worked in the past include a Recommendation System, Time Series forecasting algorithm for an e-commerce, designing and developing a platform for deploying algorithms and more.  
+I'm a Data Scientist based in São Paulo, Brazil. I've been working in IT for about 5 years on startups and big companies and my favourite thing about my job is having the opportunity to create things capable of causing an impact on a large scale. Outside of work I usually do my own pet projects and play video games.
 
-More on my [Github](https://github.com/marciovai) page
+For source code from my projects check my [Github](https://github.com/marciovai).
