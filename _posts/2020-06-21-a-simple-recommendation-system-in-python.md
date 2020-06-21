@@ -13,4 +13,4 @@ There are two main paths found in the litereture that we can go to in order to s
 
 ## Content-based
 Content-based recommendation is usually the most accurate one when both Users and Items are well known with descriptive data as well as previously recorded interactions between both. The drawback is that the implementation for this approach is relatively more complex since most of the times it requires combining different types of data efficiently.
-<img src="{{site.url}}/_img_/collaborative-filtering-example.jpg" style="display: block; margin: auto;" />
+<img src="_img_/collaborative-filtering-example.jpg" style="display: block; margin: auto;" />
