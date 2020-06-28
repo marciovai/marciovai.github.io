@@ -1,12 +1,15 @@
 ---
 layout: post
-title: Building a simple Recommendation System in Python
+title: Building a Recommendation System in Python
 featured-img: sleek
 comments: true
 ---
 
 # Introduction
-With the rise of companies that rely heavily in their ability of recommending content to their Users, the interest for tools and techniques that can be used for making better content matching also grew. In this post we will walk through the steps towards building a simple Recommendation System in Python that works based on past user-item interactions and can be used in a range of different applications.
+With the rise of companies that rely heavily in their ability of recommending content to their Users, the interest for tools and techniques that can be used for making better content matching also grew. In this post we will walk through the steps towards building a simple Recommendation System in Python that works based on past user-item interactions and can be used in a range of different applications.  
+In this post we will see to build a recommendation system in Python using Cosine Similarity for a _Collaborative-Filtering_ approach.
+
+The dataset
 
 # How it works
 There are two main paths that we can choose in order to solve our problem. They are the *Content-based* and *Collaborative-Filtering*. Both have it's strenghts and drawbacks as well as varying levels of complexity. Let's take a quick look on each of them to familiarise ourselves with the topic.
@@ -40,7 +43,7 @@ In practice what happens is that we measure how similar Users are from each othe
 The simplest way to implement this similarity measure is to simply use **Cosine Similarity** across the rows of a User x Item matrix. Let's elaborate a bit on that last sentence and understand what calculations we are doing and what are the expected results.
 
 #### Cosine Similarity
-Measures the similarity of two vectors, this is done by calculating the cosine angle between them. The benefit of using this is that it's invariant to vector size, so for example imagine we have more entrances in one vector than in the other which would make one vector larger than the other. This difference in magnitude doesn't affect Cosine Similarity since it only uses the angle of orientation between the two vectors instead of their sizes as a measure of similarity.
+Measures the similarity of two vectors, this is done by calculating the cosine angle between them. The benefit of using this method is that it's invariant to vector size, so for example imagine we have more entrances in one vector than in the other which would make one vector larger than the other. This difference in magnitude doesn't affect Cosine Similarity since it only considers the angle between the two vectors instead of their sizes as a measure of similarity.
 
 Below is the formula we will be using, for the sake of reference:
 
@@ -52,8 +55,10 @@ Even though we won't be needing to implement it ourselves since Python libraries
 
 As you can see in the formula, we normalize by the module of the product of each vector. This helps ensure that our calculation remains invariant to vector size.
 
-Bellow is a visualization to help in understanding how this solves our problem
-
+Other benefit is that values are already normalized between -1 and 1 for opposite orientation and exact same orientation respectively.
 {:refdef: style="text-align: center;"}
 ![Cosine Similarity Chart](/images/cos_similarity_chart.jpg)
 {: refdef}
+
+## Data
+As mentioned previously, Collaborative-Filtering relies on interaction data, so our dataset is composed of 
