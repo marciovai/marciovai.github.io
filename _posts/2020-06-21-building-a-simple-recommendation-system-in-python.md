@@ -34,7 +34,7 @@ For the Collaborative Filtering approach we free ourselves from having to combin
 In practice what happens is that we measure how similar Users are from each other based on the Items they interact with. For example actions like pageviews, add to wishlist, cart or purchase are considered as the User expressing interest on particular items.
 
 {:refdef: style="text-align: center;"}
-![Collaborative Filtering](/images/collaborative-filtering-example2.jpg)
+![Collaborative Filtering Example](/images/collaborative-filtering-example2.jpg)
 {: refdef}
 
 The simplest way to implement this similarity measure is to simply use **Cosine Similarity** across the rows of a User x Item matrix. Let's elaborate a bit on that last sentence and understand what calculations we are doing and what are the expected results.
@@ -45,7 +45,7 @@ Measures the similarity of two vectors, this is done by calculating the cosine a
 Below is the formula we will be using, for the sake of reference:
 
 {:refdef: style="text-align: center;"}
-![Collaborative Filtering](/images/cos_sim.png)
+![Cosine Similarity Formula](/images/cos_sim.png)
 {: refdef}
 
 Even though we won't be needing to implement it ourselves since Python libraries already have it, it's always good practice to understand what we are doing. 
@@ -55,5 +55,5 @@ As you can see in the formula, we normalize by the module of the product of each
 Bellow is a visualization to help in understanding how this solves our problem
 
 {:refdef: style="text-align: center;"}
-![Collaborative Filtering](/images/cos_similarity_chart.png)
+![Cosine Similarity Chart](/images/cos_similarity_chart.jpg)
 {: refdef}
