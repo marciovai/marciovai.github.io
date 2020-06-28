@@ -31,8 +31,24 @@ In order to sucessfully build a recomendation algorithm based on content the dat
 ## Collaborative Filtering
 For the Collaborative Filtering approach we free ourselves from having to combine multiple data sources and types together in a simple algorithm. Here we rely purely on interaction data, which is the same User x Item we saw for the Content-based approach.
 
-In practice what happens is that we measure how similar Users are from each other based on the Items they interact with. Actions like pageviews, add to wishlist, cart or purchase are considered as the User expressing interest on them.
+In practice what happens is that we measure how similar Users are from each other based on the Items they interact with. For example actions like pageviews, add to wishlist, cart or purchase are considered as the User expressing interest on particular items.
 
 {:refdef: style="text-align: center;"}
 ![Collaborative Filtering](/images/collaborative-filtering-example2.jpg)
 {: refdef}
+
+The simplest way to implement this similarity measure is to simply use **Cosine Similarity** across the rows of a User x Item matrix. Let's elaborate a bit on that last sentence and understand what calculations we are doing and what are the expected results.
+
+#### Cosine Similarity
+Measures the similarity of two vectors, this is done by calculating the cosine angle between them. The benefit of using this is that it's invariant to vector size, so for example imagine we have more entrances in one vector than in the other which would make one vector larger than the other. This difference in magnitude doesn't affect Cosine Similarity since it only uses the angle of orientation between the two vectors instead of their sizes as a measure of similarity.
+
+Below is the formula we will be using, for the sake of reference:
+
+{:refdef: style="text-align: center;"}
+![Collaborative Filtering](/images/cos_sim.png)
+{: refdef}
+
+Altough we won't be needing to implement it ourselves (Python libraries already have it), it's always good practice to understand what we are doing. 
+
+As you can see in the formula, we normalize by the module of the product of each vector. This helps ensure that our calculation remains invariant to vector size.
+
