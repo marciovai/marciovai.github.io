@@ -52,7 +52,7 @@ Even though we won't be needing to implement it ourselves since Python libraries
 
 As you can see in the formula, we normalize by the module of the product of each vector. This helps ensure that our calculation remains invariant to vector size.
 
-Bellow is a visualization to help in understanding how this solves our problem.
+Bellow is a visualization to help in understanding how this solves our problem
 
 {:refdef: style="text-align: center;"}
 ![Collaborative Filtering](/images/cos_similarity_chart.png)
