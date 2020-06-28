@@ -48,7 +48,12 @@ Below is the formula we will be using, for the sake of reference:
 ![Collaborative Filtering](/images/cos_sim.png)
 {: refdef}
 
-Altough we won't be needing to implement it ourselves (Python libraries already have it), it's always good practice to understand what we are doing. 
+Even though we won't be needing to implement it ourselves since Python libraries already have it, it's always good practice to understand what we are doing. 
 
 As you can see in the formula, we normalize by the module of the product of each vector. This helps ensure that our calculation remains invariant to vector size.
 
+Bellow is a visualization to help in understanding how this solves our problem.
+
+{:refdef: style="text-align: center;"}
+![Collaborative Filtering](/images/cos_similarity_chart.png)
+{: refdef}
