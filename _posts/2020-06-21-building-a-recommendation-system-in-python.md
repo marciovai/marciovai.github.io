@@ -9,8 +9,6 @@ comments: true
 With the rise of companies that rely heavily in their ability of recommending content to their Users, the interest for tools and techniques that can be used for making better content matching also grew. In this post we will walk through the steps towards building a simple Recommendation System in Python that works based on past user-item interactions and can be used in a range of different applications.  
 In this post we will see to build a recommendation system in Python using Cosine Similarity for a _Collaborative-Filtering_ approach.
 
-The dataset
-
 # How it works
 There are two main paths that we can choose in order to solve our problem. They are the *Content-based* and *Collaborative-Filtering*. Both have it's strenghts and drawbacks as well as varying levels of complexity. Let's take a quick look on each of them to familiarise ourselves with the topic.
 
@@ -60,5 +58,6 @@ Other benefit is that values are already normalized between -1 and 1 for opposit
 ![Cosine Similarity Chart](/images/cos_similarity_chart.jpg)
 {: refdef}
 
-## Data
-As mentioned previously, Collaborative-Filtering relies on interaction data, so our dataset is composed of 
+## Dataset
+As mentioned previously, Collaborative-Filtering relies on interaction data so we need a set of recorded interactions between Users and Items. Luckily for us there is a dataset that does exactly that, which is the MovieLens dataset composed of movie ratings made by users.
+
