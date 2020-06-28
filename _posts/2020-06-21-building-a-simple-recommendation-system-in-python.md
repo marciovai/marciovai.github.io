@@ -1,6 +1,6 @@
 ---
 layout: post
-title: A simple Recommendation System in Python
+title: Building a simple Recommendation System in Python
 featured-img: sleek
 comments: true
 ---
