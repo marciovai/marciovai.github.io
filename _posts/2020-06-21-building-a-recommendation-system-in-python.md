@@ -54,10 +54,17 @@ Even though we won't be needing to implement it ourselves since Python libraries
 As you can see in the formula, we normalize by the module of the product of each vector. This helps ensure that our calculation remains invariant to vector size.
 
 Other benefit is that values are already normalized between -1 and 1 for opposite orientation and exact same orientation respectively.
+
 {:refdef: style="text-align: center;"}
 ![Cosine Similarity Chart](/images/cos_similarity_chart.jpg)
 {: refdef}
 
 ## Dataset
-As mentioned previously, Collaborative-Filtering relies on interaction data so we need a set of recorded interactions between Users and Items. Luckily for us there is a dataset that does exactly that, which is the MovieLens dataset composed of movie ratings made by users.
+As mentioned previously, Collaborative-Filtering relies on interaction data so we need a set of recorded interactions between Users and Items. Luckily for us there is a dataset that does exactly that - the MovieLens 100K dataset composed of 100.000 individual movie ratings ranging from 1 to 5, made by 943 users in 1682 movies.
+This is probably the best publicly available dataset for working on recommendation systems, it's based on real data and is already preprocessed for us.
 
+{:refdef: style="text-align: center;"}
+![Movie Lens 100K](/images/movie_lens_100k.jpg)
+{: refdef}
+
+It's important to note that even though the dataset we will be using is comprised of user ratings on movies, our Recommender System will still be easily adaptable to whatever different problem it might need to as long as the nature of the problem is similar. At the core of what we are doing, we are simply using Cosine Similarity as a way to determine similarity between two different vectors (users) based on their features (item interactions).
