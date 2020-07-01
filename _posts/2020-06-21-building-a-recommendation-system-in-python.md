@@ -142,3 +142,28 @@ test = ratings[ratings['date'] >= pd.to_datetime('1998-02-22')]
 ```
 
 Nice, now we can transform our data into a pivot table with the following command:
+```python
+# pivot train
+train_pivot = train[['user_id', 'movie_id', 'rating']].pivot(index='user_id', columns='movie_id').fillna(0).astype(int)
+
+# pivot test
+test_pivot = train[['user_id', 'movie_id', 'rating']].pivot(index='user_id', columns='movie_id').fillna(0).astype(int)
+```
+
+Next step we will transform our sparse DataFrame into a [SciPy row-sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html).
+
+```python
+from scipy import sparse
+
+# create scipy sparse from pivot tables
+train_sparse = sparse.csr_matrix(train_pivot)
+test_sparse = sparse.csr_matrix(test_pivot)
+```
+
+You may be asking whats the point of doing that transformation since we can already use our currently NumPy ndarray as is. 
+
+This brings us to one of the drawbacks of this method - We need to have the entire dataset in memory to be able to compute distances among all Users, even though we could implement a lazy loading to load Users in batches instead of all at once because we need to do NxN computations in order to calculate all distances (where N = # of Users) there will still be a big IO bottleneck.
+
+In our case we should be able to fit the entire dataset in memory just fine since we only have 943 Users and 1682 Movies total but if the User base was composed of hundreds of thousands of Users and tens of thousands of Movies (which it usually is in practice) things would've been different.
+
+Our SciPy implementation is very memory efficient for storing sparse datasets like ours, which has more than 99% of zero entries.
