@@ -63,8 +63,82 @@ Other benefit is that values are already normalized between -1 and 1 for opposit
 As mentioned previously, Collaborative-Filtering relies on interaction data so we need a set of recorded interactions between Users and Items. Luckily for us there is a dataset that does exactly that - the MovieLens 100K dataset composed of 100.000 individual movie ratings ranging from 1 to 5, made by 943 users in 1682 movies.
 This is probably the best publicly available dataset for working on recommendation systems, it's based on real data and is already preprocessed for us.
 
+It's important to note that even though the dataset we will be using is comprised of user ratings on movies, our Recommender System will still be easily adaptable to other types of recommendation problems. At the core of what we are doing, we are simply using Cosine Similarity as a way to determine similarity between two different vectors (users) based on their features (item interactions).
+
+Without further ado let's get to it!
+
+## Development
+
+### Preparing the data
+Since our goal is to use **Cosine Similarity** to measure how close Users are from each other, we need to transform our dataset from a dense to a sparse representation. In order to achieve that each User needs to be represented by a single row in the dataset so that the columns are the ratings given by the Users to each different movie.
+
+But first, let's get our MovieLens 100K Dataset!  
+The code below will download the dataset from the public repository, extract it and parse some of the columns to the correct datatype.
+
+```python
+import pandas as pd
+from urllib.request import urlretrieve
+import zipfile
+
+# Download MovieLens data.
+print("Downloading movielens data...")
+
+urlretrieve("http://files.grouplens.org/datasets/movielens/ml-100k.zip", "movielens.zip")
+zip_ref = zipfile.ZipFile('movielens.zip', "r")
+zip_ref.extractall()
+print("Done. Dataset contains:")
+print(zip_ref.read('ml-100k/u.info'))
+
+# Load each data set (users, movies, and ratings).
+ratings_cols = ['user_id', 'movie_id', 'rating', 'unix_timestamp']
+ratings = pd.read_csv(
+    'ml-100k/u.data', sep='\t', names=ratings_cols, encoding='latin-1')
+
+# The movies file contains a binary feature for each genre.
+genre_cols = [
+    "genre_unknown", "Action", "Adventure", "Animation", "Children", "Comedy",
+    "Crime", "Documentary", "Drama", "Fantasy", "Film-Noir", "Horror",
+    "Musical", "Mystery", "Romance", "Sci-Fi", "Thriller", "War", "Western"
+]
+
+movies_cols = [
+    'movie_id', 'title', 'release_date', "video_release_date", "imdb_url"
+] + genre_cols
+
+movies = pd.read_csv(
+    'ml-100k/u.item', sep='|', names=movies_cols, encoding='latin-1')
+
+# Since the ids start at 1, we shift them to start at 0.
+movies["movie_id"] = movies["movie_id"].apply(lambda x: str(x-1))
+movies["year"] = movies['release_date'].apply(lambda x: str(x).split('-')[-1])
+ratings["movie_id"] = ratings["movie_id"].apply(lambda x: str(x-1))
+ratings["user_id"] = ratings["user_id"].apply(lambda x: str(x-1))
+ratings["rating"] = ratings["rating"].apply(lambda x: float(x))
+
+# Get date from unix timestamp
+ratings['date'] = pd.to_datetime(ratings['unix_timestamp'], origin='unix',unit='s').dt.date
+
+# remove unix date since we already have it in  a human-friendly format
+ratings.drop('unix_timestamp', axis=1, inplace=True)
+```
+
+Let's see how our data looks by running:
+```python
+ratings.head()
+```
 {:refdef: style="text-align: center;"}
 ![Movie Lens 100K](/images/movie_lens_100k.jpg)
 {: refdef}
 
-It's important to note that even though the dataset we will be using is comprised of user ratings on movies, our Recommender System will still be easily adaptable to whatever different problem it might need to as long as the nature of the problem is similar. At the core of what we are doing, we are simply using Cosine Similarity as a way to determine similarity between two different vectors (users) based on their features (item interactions).
+So we have ```user_id```, ```movie_id``` and ```rating``` which is what we needed to solve our problem plus the newly added ```date``` which we will be using to separate the training and test sets later on.
+
+Before moving on to the algorithm itself there is one more step to take care of, and it's the most important one: transforming the dataset from *dense* to *sparse*. We can use pandas **pivot** to solve this but there is one caveat - we won't be able to store dates in this DataFrame. So to make our lifes easier lets first to the Train-Test Split in the dataset.
+
+The dataset goes from 1997-09-20 to 1998-04-22 which gives about 6 months worth of data, here we will use 4 months to train and the last 2 months for making predictions.
+
+```python
+train = ratings[ratings['date'] < pd.to_datetime('1998-02-22')]
+test = ratings[ratings['date'] >= pd.to_datetime('1998-02-22')]
+```
+
+Nice, now we can transform our data into a pivot table with the following command:
