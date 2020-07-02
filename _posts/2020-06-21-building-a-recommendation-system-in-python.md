@@ -205,9 +205,51 @@ user_x_user_similar = top_n_idx_sparse(similarities_sparse, 5)
 
 Here I decided to pick the top 5 most similar Users for each User since it should be enough for getting recommendations, but feel free to increase the value for K if your particular problem requires it.
 
+Now we have our set of recommendations for each user stored in a sparse matrix, next we want to transform the data to a format easier to preprocess.
+
 ```python
-# transforms result from sparse matrix into a dict user: [job1, job2]
+# transforms result from sparse matrix into a dict as {matrix_index: [user_1, user_2,..., user_5]}
 user_user_similar_dict = {}
 for idx, val in enumerate(user_user_similar):
         user_user_similar_dict.update({idx: val.tolist()})
+```
+
+Our dict has as keys the row numbers from the sparse matrix and user lists as values, so what we need to do next is transform the key indices into the respective user ids from our dataset, thus matching the recommendations with the right user ids.
+
+```python
+# gets actual user ids from data based on sparse matrix position index
+similar_users_final = {}
+for user, similar_users in user_user_similar_dict.items():
+    idx = train_pivot.index[user]
+    values = []
+    for value in similar_users:
+        values.append(train_pivot.index[value])
+
+similar_users_final.update({idx: values})
+```
+
+So we fixed the keys of our dict to be the actual user ids from the dataset instead of the index from the sparse matrix. Last step is to obtain the actual movie ids from our list of users.
+For each user in the dataset we have a list of 5 most similar users, we will use these to get our recommendations.
+
+The code below is going to get all the Movies that the similar users interacted with and store them into a dictionary. Essentially what we are doing here is transforming our User x User dict into a User x Movie one.
+
+```python
+# transforms dict of users: [similar_user1, similar_user2] into user: [movie_1, movie_2,..., movie_n]
+user_movies = {}
+for user, similar_users in similar_users_final.items():
+    # remove user itself from similar_users
+    try:
+        del similar_users[similar_users.index(user)]
+    except:
+        pass
+    movies = train[train['user_id'].isin(similar_users)]['movie_id'].values
+    user_movies.update({user: list(set(movies))})
+```
+
+Awesome, now we are close to the end result we were looking for, last step is to store this data into a DataFrame for easier visualization and manipulation.
+
+```python
+# transforms dictionary into list of tuples and saves on DataFrame
+user_movie_tuple = [(user, movie) for user, user_movies in user_movies.items() for movie in user_movies]
+user_movie_df = pd.DataFrame(user_movie_tuple, columns=['user_id', 'movie_id'])
 ```
