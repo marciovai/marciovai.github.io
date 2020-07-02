@@ -77,6 +77,7 @@ The code below will download the dataset from the public repository, extract it 
 
 ```python
 import pandas as pd
+import numpy as np
 from urllib.request import urlretrieve
 import zipfile
 
@@ -160,10 +161,53 @@ train_sparse = sparse.csr_matrix(train_pivot)
 test_sparse = sparse.csr_matrix(test_pivot)
 ```
 
-You may be asking whats the point of doing that transformation since we can already use our currently NumPy ndarray as is. 
+You may be asking whats the point of doing that transformation since we can already use our currently NumPy ```ndarray``` as is. 
 
-This brings us to one of the drawbacks of this method - We need to have the entire dataset in memory to be able to compute distances among all Users, even though we could implement a lazy loading to load Users in batches instead of all at once because we need to do NxN computations in order to calculate all distances (where N = # of Users) there will still be a big IO bottleneck.
+This brings us to one of the drawbacks of this method - We need to have the entire dataset in memory to be able to compute distances among all Users, even though we could implement a process to load Users in batches instead of all at once because we need to do NxN computations in order to calculate all distances (where N = # of Users) there will still be a big IO bottleneck.
 
-In our case we should be able to fit the entire dataset in memory just fine since we only have 943 Users and 1682 Movies total but if the User base was composed of hundreds of thousands of Users and tens of thousands of Movies (which it usually is in practice) things would've been different.
+In our case we should be able to fit the entire dataset in memory just fine since we only have 943 Users and 1682 Movies total but if the User base was composed of hundreds of thousands of Users and tens of thousands of Items (which it usually is in practice) things would've been different.
 
-Our SciPy implementation is very memory efficient for storing sparse datasets like ours, which has more than 99% of zero entries.
+Our SciPy implementation is very memory efficient for storing sparse datasets like the one we have, which has many zero entries per row.
+
+Now we are good to go, our Dataset is ready so lets calculate the distances!
+
+### Calculating the distance among Users
+
+We could write our own implementation to calculate the Cosine Similarity for each row in the dataset, but luckly for us *sklearan* already has it implemented so we will go with it.
+
+```python
+from sklearn.metrics.pairwise import cosine_similarity
+
+# calculate similarity between each row (user x movies)
+similarities_sparse = cosine_similarity(train_sparse, dense_output=False)
+```
+
+Here we will use ```dense_output=False``` to have the output as a SciPy sparse matrix, this is a step that we are taking to make sure that our matrix fits in memory, otherwise the output would be a numpy ```ndarray``` which isn't as efficient for storing large sparse datasets.
+
+The shape of our  ```similarities_sparse``` is ```(training_users, training_users)``` and the values are the similarity scores computed for each User against every other User in the dataset.
+
+Next for every User we need to get the *top K* most similar Users so that we can look at which Movies they liked and make suggestions - that's where the actual **Collaborative Filtering** happens.
+
+The method ```top_n_idx_sparse``` below takes as input a ```scipy.csr_matrix``` and returns the *top K* highest indexes in each row, thats where we get the most similar Users for each User in our Dataset.
+
+```python
+# returns index (column position) of top n similarities in each row
+def top_n_idx_sparse(matrix, n):
+    '''Return index of top n values in each row of a sparse matrix'''
+    top_n_idx = []
+    for le, ri in zip(matrix.indptr[:-1], matrix.indptr[1:]):
+        n_row_pick = min(n, ri - le)
+        top_n_idx.append(matrix.indices[le + np.argpartition(matrix.data[le:ri], -n_row_pick)[-n_row_pick:]])
+    return top_n_idx
+
+user_x_user_similar = top_n_idx_sparse(similarities_sparse, 5)
+```
+
+Here I decided to pick the top 5 most similar Users for each User since it should be enough for getting recommendations, but feel free to increase the value for K if your particular problem requires it.
+
+```python
+# transforms result from sparse matrix into a dict user: [job1, job2]
+user_user_similar_dict = {}
+for idx, val in enumerate(user_user_similar):
+        user_user_similar_dict.update({idx: val.tolist()})
+```
