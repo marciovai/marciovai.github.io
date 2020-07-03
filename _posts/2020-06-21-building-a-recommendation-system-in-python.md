@@ -234,7 +234,7 @@ For each user in the dataset we have a list of 5 most similar users, we will use
 The code below is going to get a sample from the Movies that the similar users interacted with and store them into a dictionary. Essentially what we are doing here is transforming our User x User dict into a User x Movie one.
 
 There are a other few things happening in the code below that are worth noting:
-- We get only a sample of movies from each similar user (25 in this case) because this dataset is somewhat dense in the sense that on average users rated at least 20 movies each. By taking samples we get a balanced set of movies from all the similar users.
+- We get only a sample of movies from each similar user (10 in this case) because this dataset is somewhat dense in the sense that on average users rated at least 20 movies each. By taking samples we get a balanced set of movies from all the similar users.
 
 - Some extra logic is needed since our dataset is about movie ratings (from 1 to 5 starts), we want to make sure that we recommend to users movies that other similar users liked, so we filter by ```rating >= 3```. Unfortunately there could be the case where users only rated movies lower than that, so we add some extra code to make sure that every user gets at least a single recommendation.
 
@@ -249,12 +249,12 @@ for user, similar_users in similar_users_final.items():
         pass
     # get movie ids from list of movies rated by similar users.
     # also apply extra logic to get the most high rated movies from the similar users
-    movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=3]
-    if movies.empty:
-      movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=2]
-    if movies.empty:
-      movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=1]
-    movies_sample = movies.sample(n=25)['movie_id'].values
+    movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=3]
+    if movies_rec.empty:
+      movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=2]
+    if movies_rec.empty:
+      movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=1]
+    movies_sample = movies_rec.sample(n=10)['movie_id'].values
     user_movies.update({user: list(set(movies_sample))})
 ```
 
@@ -264,4 +264,16 @@ Awesome, now we are close to the end result we were looking for, last step is to
 # transforms dictionary into list of tuples and saves on DataFrame
 user_movie_tuple = [(user, movie) for user, user_movies in user_movies.items() for movie in user_movies]
 user_movie_df = pd.DataFrame(user_movie_tuple, columns=['user_id', 'movie_id'])
+```
+
+Now if we check how our final DataFrame looks like looks like:
+```python
+user_movie_df.sample(n=5)
+
+index user_id movie_id
+ 6420	889 	153
+ 1257	261	    0
+ 4235	614	    22
+ 974	221	    285
+ 5778	809	    288
 ```
