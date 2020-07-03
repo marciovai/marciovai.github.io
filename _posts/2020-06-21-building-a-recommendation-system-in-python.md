@@ -231,19 +231,31 @@ similar_users_final.update({idx: values})
 So we fixed the keys of our dict to be the actual user ids from the dataset instead of the index from the sparse matrix. Last step is to obtain the actual movie ids from our list of users.
 For each user in the dataset we have a list of 5 most similar users, we will use these to get our recommendations.
 
-The code below is going to get all the Movies that the similar users interacted with and store them into a dictionary. Essentially what we are doing here is transforming our User x User dict into a User x Movie one.
+The code below is going to get a sample from the Movies that the similar users interacted with and store them into a dictionary. Essentially what we are doing here is transforming our User x User dict into a User x Movie one.
+
+There are a other few things happening in the code below that are worth noting:
+- We get only a sample of movies from each similar user (25 in this case) because this dataset is somewhat dense in the sense that on average users rated at least 20 movies each. By taking samples we get a balanced set of movies from all the similar users.
+
+- Some extra logic is needed since our dataset is about movie ratings (from 1 to 5 starts), we want to make sure that we recommend to users movies that other similar users liked, so we filter by ```rating >= 3```. Unfortunately there could be the case where users only rated movies lower than that, so we add some extra code to make sure that every user gets at least a single recommendation.
 
 ```python
-# transforms dict of users: [similar_user1, similar_user2] into user: [movie_1, movie_2,..., movie_n]
+# transforms list of users: [similar_user1, similar_user2] into list of user: [job1, job2]
 user_movies = {}
 for user, similar_users in similar_users_final.items():
-    # remove user itself from similar_users
+    # remove the user itself from similar_users (since cos_sim(user_1, user_1) is 1)
     try:
         del similar_users[similar_users.index(user)]
     except:
         pass
-    movies = train[train['user_id'].isin(similar_users)]['movie_id'].values
-    user_movies.update({user: list(set(movies))})
+    # get movie ids from list of movies rated by similar users.
+    # also apply extra logic to get the most high rated movies from the similar users
+    movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=3]
+    if movies.empty:
+      movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=2]
+    if movies.empty:
+      movies = train[(train['user_id'].isin(similar_users)) & train['rating']>=1]
+    movies_sample = movies.sample(n=25)['movie_id'].values
+    user_movies.update({user: list(set(movies_sample))})
 ```
 
 Awesome, now we are close to the end result we were looking for, last step is to store this data into a DataFrame for easier visualization and manipulation.
