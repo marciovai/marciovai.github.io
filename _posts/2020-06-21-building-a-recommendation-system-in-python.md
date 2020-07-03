@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Building a Recommendation System in Python
-featured-img: sleek
+featured-img: banff
 comments: true
 ---
 
