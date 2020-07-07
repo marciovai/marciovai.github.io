@@ -195,6 +195,7 @@ user_user_similar = top_n_idx_sparse(similarities_sparse, 5)
 
 Here I decided to pick the top 5 most similar Users for each User since it should be enough for getting recommendations, but feel free to increase the value for K if your particular problem requires it.
 
+### Process data for easier visualization
 Now we have our set of recommendations for each user stored in a sparse matrix, next we want to transform the data to a format easier to preprocess.
 
 ```python
@@ -249,6 +250,8 @@ for user, similar_users in similar_users_final.items():
 ```
 
 Awesome, now we are close to the end result we were looking for, last step is to store this data into a DataFrame for easier visualization and manipulation.
+
+### Looking at the results
 
 ```python
 # transform dictionary into list of tuples and save on DataFrame
