@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Timeseries Forecasting with Model Ensemble
-featured-img: banff
+featured-img: plansee
 comments: true
 ---
 
