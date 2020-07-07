@@ -242,7 +242,7 @@ for user, similar_users in similar_users_final.items():
       movies_rec = ratings[(ratings['user_id'].isin(similar_users)) & ratings['rating']>=2]
     if movies_rec.empty:
       movies_rec = ratings[(ratings['user_id'].isin(similar_users)) & ratings['rating']>=1]
-    movies_sample = movies_rec.sample(n=10)['movie_id'].values
+    movies_sample = movies_rec.sample(n=10, random_state=33)['movie_id'].values
     user_movies.update({user: list(set(movies_sample))})
 ```
 
@@ -254,14 +254,29 @@ user_movie_tuple = [(user, movie) for user, user_movies in user_movies.items() f
 user_movie_df = pd.DataFrame(user_movie_tuple, columns=['user_id', 'movie_id'])
 ```
 
-Now if we check how our final DataFrame looks like looks like:
+Next we want to add the movie names to the DataFrame with the recommendations by joining it with the ```movies``` one:
 ```python
-user_movie_df.sample(n=5)
-
-index user_id movie_id
- 6420	889 	153
- 1257	261	    0
- 4235	614	    22
- 974	221	    285
- 5778	809	    288
+rec_batch = pd.merge(user_movie_df, movies[['movie_id', 'title']], on='movie_id', how='left')
 ```
+Looking at the recommendations made for a specific Users:
+
+```python
+rec_batch[rec_batch['user_id']=='99'][['movie_id', 'title']]
+
+movie_id	title
+288	        Evita (1996)
+257	        Contact (1997)
+312	        Titanic (1997)
+321	        Murder at 1600 (1997)
+690	        Dark City (1998)
+311	        Midnight in the Garden of Good and Evil (1997)
+299	        Air Force One (1997)
+320	        Mother (1996)
+325	        G.I. Jane (1997)
+```
+
+Looks like the user_id 99 likes Drama movies! With this DataFrame at hand we can know recommend Movies to all the Users in the Dataset based on their behavior. Once a new User joins we won't be able to make recommendations right away ([Cold Start](https://en.wikipedia.org/wiki/Cold_start_(recommender_systems))), but once the User starts rating Movies previously watched we will be able to measure it's similarity with other existing Users and make the recommendations based on that.
+
+The full source code as well as a iPython Notebook can be found on this GitHub [repository](https://github.com/marciovai/recommendation_system).
+
+Thanks for reading and if you have any trouble implementing this or have any feedback in general feel free to leave a comment below or contact me!
