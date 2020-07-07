@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Timeseries Forecasting with Model Ensemble (COMING SOON)
+title: Timeseries Forecasting with Model Ensemble
 featured-img: banff
 comments: true
 ---
