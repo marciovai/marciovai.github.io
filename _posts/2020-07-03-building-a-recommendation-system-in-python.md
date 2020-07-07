@@ -133,22 +133,11 @@ ratings.head()
 
 So we have ```user_id```, ```movie_id``` and ```rating``` which is what we needed to solve our problem plus the newly added ```date``` which we will be using to separate the training and test sets later on.
 
-Before moving on to the algorithm itself there is one more step to take care of, and it's the most important one: transforming the dataset from *dense* to *sparse*. We can use pandas **pivot** to solve this but there is one caveat - we won't be able to store dates in this DataFrame. So to make our lifes easier lets first to the Train-Test Split in the dataset.
+Before moving on to the algorithm itself there is one more step to take care of, and it's the most important one: transforming the dataset from *dense* to *sparse*. We can use pandas **pivot** to solve this.
 
-The dataset goes from 1997-09-20 to 1998-04-22 which gives about 6 months worth of data, here we will use 4 months to train and the last 2 months for making predictions.
-
+Cool, now we can transform our data into a pivot table with the following command:
 ```python
-train = ratings[ratings['date'] < pd.to_datetime('1998-02-22')]
-test = ratings[ratings['date'] >= pd.to_datetime('1998-02-22')]
-```
-
-Nice, now we can transform our data into a pivot table with the following command:
-```python
-# pivot train
-train_pivot = train[['user_id', 'movie_id', 'rating']].pivot(index='user_id', columns='movie_id').fillna(0).astype(int)
-
-# pivot test
-test_pivot = train[['user_id', 'movie_id', 'rating']].pivot(index='user_id', columns='movie_id').fillna(0).astype(int)
+data_pivot = ratings[['user_id', 'movie_id', 'rating']].pivot(index='user_id', columns='movie_id').fillna(0).astype(int)
 ```
 
 Next step we will transform our sparse DataFrame into a [SciPy row-sparse matrix](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csr_matrix.html).
@@ -157,8 +146,7 @@ Next step we will transform our sparse DataFrame into a [SciPy row-sparse matrix
 from scipy import sparse
 
 # create scipy sparse from pivot tables
-train_sparse = sparse.csr_matrix(train_pivot)
-test_sparse = sparse.csr_matrix(test_pivot)
+data_sparse = sparse.csr_matrix(data_pivot)
 ```
 
 You may be asking whats the point of doing that transformation since we can already use our currently NumPy ```ndarray``` as is. 
@@ -179,12 +167,12 @@ We could write our own implementation to calculate the Cosine Similarity for eac
 from sklearn.metrics.pairwise import cosine_similarity
 
 # calculate similarity between each row (user x movies)
-similarities_sparse = cosine_similarity(train_sparse, dense_output=False)
+similarities_sparse = cosine_similarity(data_sparse, dense_output=False)
 ```
 
 Here we will use ```dense_output=False``` to have the output as a SciPy sparse matrix, this is a step that we are taking to make sure that our matrix fits in memory, otherwise the output would be a numpy ```ndarray``` which isn't as efficient for storing large sparse datasets.
 
-The shape of our  ```similarities_sparse``` is ```(training_users, training_users)``` and the values are the similarity scores computed for each User against every other User in the dataset.
+The shape of our  ```similarities_sparse``` is ```(# of users, # of users)``` and the values are the similarity scores computed for each User against every other User in the dataset.
 
 Next for every User we need to get the *top K* most similar Users so that we can look at which Movies they liked and make suggestions - that's where the actual **Collaborative Filtering** happens.
 
@@ -200,7 +188,7 @@ def top_n_idx_sparse(matrix, n):
         top_n_idx.append(matrix.indices[le + np.argpartition(matrix.data[le:ri], -n_row_pick)[-n_row_pick:]])
     return top_n_idx
 
-user_x_user_similar = top_n_idx_sparse(similarities_sparse, 5)
+user_user_similar = top_n_idx_sparse(similarities_sparse, 5)
 ```
 
 Here I decided to pick the top 5 most similar Users for each User since it should be enough for getting recommendations, but feel free to increase the value for K if your particular problem requires it.
@@ -220,12 +208,12 @@ Our dict has as keys the row numbers from the sparse matrix and user lists as va
 # gets actual user ids from data based on sparse matrix position index
 similar_users_final = {}
 for user, similar_users in user_user_similar_dict.items():
-    idx = train_pivot.index[user]
+    idx = data_pivot.index[user]
     values = []
     for value in similar_users:
-        values.append(train_pivot.index[value])
+        values.append(data_pivot.index[value])
 
-similar_users_final.update({idx: values})
+    similar_users_final.update({idx: values})
 ```
 
 So we fixed the keys of our dict to be the actual user ids from the dataset instead of the index from the sparse matrix. Last step is to obtain the actual movie ids from our list of users.
@@ -234,7 +222,7 @@ For each user in the dataset we have a list of 5 most similar users, we will use
 The code below is going to get a sample from the Movies that the similar users interacted with and store them into a dictionary. Essentially what we are doing here is transforming our User x User dict into a User x Movie one.
 
 There are a other few things happening in the code below that are worth noting:
-- We get only a sample of movies from each similar user (10 in this case) because this dataset is somewhat dense in the sense that on average users rated at least 20 movies each. By taking samples we get a balanced set of movies from all the similar users.
+- We get only a sample of movies from each similar user (10 in this case) because this dataset is somewhat dense in the sense that on average users rated at least 20 movies each. By taking samples we get a balanced set of movies from all top k the similar users.
 
 - Some extra logic is needed since our dataset is about movie ratings (from 1 to 5 starts), we want to make sure that we recommend to users movies that other similar users liked, so we filter by ```rating >= 3```. Unfortunately there could be the case where users only rated movies lower than that, so we add some extra code to make sure that every user gets at least a single recommendation.
 
@@ -249,11 +237,11 @@ for user, similar_users in similar_users_final.items():
         pass
     # get movie ids from list of movies rated by similar users.
     # also apply extra logic to get the most high rated movies from the similar users
-    movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=3]
+    movies_rec = ratings[(ratings['user_id'].isin(similar_users)) & ratings['rating']>=3]
     if movies_rec.empty:
-      movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=2]
+      movies_rec = ratings[(ratings['user_id'].isin(similar_users)) & ratings['rating']>=2]
     if movies_rec.empty:
-      movies_rec = train[(train['user_id'].isin(similar_users)) & train['rating']>=1]
+      movies_rec = ratings[(ratings['user_id'].isin(similar_users)) & ratings['rating']>=1]
     movies_sample = movies_rec.sample(n=10)['movie_id'].values
     user_movies.update({user: list(set(movies_sample))})
 ```
@@ -261,7 +249,7 @@ for user, similar_users in similar_users_final.items():
 Awesome, now we are close to the end result we were looking for, last step is to store this data into a DataFrame for easier visualization and manipulation.
 
 ```python
-# transforms dictionary into list of tuples and saves on DataFrame
+# transform dictionary into list of tuples and save on DataFrame
 user_movie_tuple = [(user, movie) for user, user_movies in user_movies.items() for movie in user_movies]
 user_movie_df = pd.DataFrame(user_movie_tuple, columns=['user_id', 'movie_id'])
 ```
