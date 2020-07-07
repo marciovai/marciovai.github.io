@@ -9,6 +9,8 @@ comments: true
 With the rise of companies that rely heavily in their ability of recommending content to their Users, the interest for tools and techniques that can be used for making better content matching also grew. In this post we will walk through the steps towards building a simple Recommendation System in Python that works based on past user-item interactions and can be used in a range of different applications.  
 In this post we will see to build a recommendation system in Python using Cosine Similarity for a _Collaborative-Filtering_ approach.
 
+Don't worry about copying and pasting the code from this article, I will leave a Python file as well as a iPython Notebook with the full source code available at this [Github Repo](https://github.com/marciovai/recommendation_system).
+
 # How it works
 There are two main paths that we can choose in order to solve our problem. They are the *Content-based* and *Collaborative-Filtering*. Both have it's strenghts and drawbacks as well as varying levels of complexity. Let's take a quick look on each of them to familiarise ourselves with the topic.
 
@@ -277,6 +279,6 @@ movie_id	title
 
 Looks like the user_id 99 likes Drama movies! With this DataFrame at hand we can know recommend Movies to all the Users in the Dataset based on their behavior. Once a new User joins we won't be able to make recommendations right away ([Cold Start](https://en.wikipedia.org/wiki/Cold_start_(recommender_systems))), but once the User starts rating Movies previously watched we will be able to measure it's similarity with other existing Users and make the recommendations based on that.
 
-The full source code as well as a iPython Notebook can be found on this GitHub [repository](https://github.com/marciovai/recommendation_system).
+The full source code as well as a iPython Notebook can be found on this GitHub [here](https://github.com/marciovai/recommendation_system).
 
-Thanks for reading and if you have any trouble implementing this or have any feedback in general feel free to leave a comment below or contact me!
+Thanks for reading and if you have any trouble implementing this solution or have any feedback in general feel free to leave a comment below or contact me!
