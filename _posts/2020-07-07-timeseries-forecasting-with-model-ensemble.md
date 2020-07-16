@@ -6,4 +6,4 @@ comments: true
 ---
 
 ## This Post is coming soon, check back later!
-_Expected to be out on July 13th 2020_
+_Expected to be out on July 20th 2020_
