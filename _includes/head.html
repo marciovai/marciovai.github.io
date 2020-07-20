@@ -33,4 +33,9 @@
   <script type="text/javascript">
    {% include loadCss.js %}
   </script>
+
+{% if jekyll.environment == 'production' %}
+{% include analytics.html %}
+{% endif %}
+
 </head>
