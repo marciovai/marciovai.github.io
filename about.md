@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-{:refdef: style="text-align: left;"}
+{:refdef: style="text-align: center;"}
 ![São Paulo](/images/sao-paulo.jpg)
 {: refdef}
 
