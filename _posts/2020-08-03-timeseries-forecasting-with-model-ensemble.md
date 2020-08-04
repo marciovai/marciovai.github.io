@@ -164,6 +164,8 @@ Since we created lags as features, there is one more thing we need to do: remove
 train.dropna(axis=0, inplace=True)
 ```
 
+## Modeling
+
 Good to go! Next let's define our training loop to create our model ensemble!
 
 ```python
@@ -253,6 +255,7 @@ data_test_dates = data_test_dates.iloc[1:]
 # add original labels from data_cp, which was untouched from the start
 data_test_dates['label'] = data_cp[(data_cp['date'] >= start_forecast) & (data_cp['date'] < end_forecast)]['Sunspots'].values
 ```
+## Results
 
 Comparing our forecast (```Sunspots_trended```) and the actual labels
 
