@@ -264,7 +264,7 @@ Comparing our forecast (```Sunspots_trended```) and the actual labels
 {: refdef}
 
 {:refdef: style="text-align: center;"}
-![Results 2](/images/results_2.JPG)
+![Results 2](/images/results_2.jpg)
 {: refdef}
 
 As we can see the model did a pretty good job overall in modeling the series, including the seasonality observed near the end of the last months.
@@ -283,7 +283,7 @@ for index, model in models_dict.items():
 ```
 
 {:refdef: style="text-align: center;"}
-![Results 2](/images/results_2.jpg)
+![Results 2](/images/feature_importance.JPG)
 {: refdef}
 
 As expected the lag features had a big importance for all models, remaining valueble across the entire forecast horizon while the other seasonality features didn't bring as much to the table while compared to the lags.
