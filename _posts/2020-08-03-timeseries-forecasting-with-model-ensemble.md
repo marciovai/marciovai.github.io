@@ -18,6 +18,8 @@ One of the strenghts of tree-based algorithms when used for Timeseries is its ab
 
 Also, before we being: Don't take this as the state-of-the-art solution for any Timeseries problem because there is no such thing, at least for now. Instead, use this as an additional tool or modeling approach to add to your arsenal for solving Timeseries tasks. Now let's get to the modeling!
 
+The full source code is available [here](https://github.com/marciovai/timeseries_ensemble).
+
 # The Model(s)
 
 As mentioned before the algorithm we will be using is the GBM, basically the idea is to create an ensemble of multiple trees, with each tree forecasting at _t+i (i=1,..., N_) where _N_ is the last date in our forecast horizon. So with that if for example we have data sampled per week and want to forecast 12 weeks ahead, a total of 12 models will be needed where each subsequent model forecasts one week ahead of the previous one. 
@@ -278,5 +280,13 @@ for index, model in models_dict.items():
 ```
 
 {:refdef: style="text-align: center;"}
-![Results 2](/images/results_2.JPG)
+![Results 2](/images/results_2.jpg)
 {: refdef}
+
+As expected the lag features had a big importance for all models, remaining valueble across the entire forecast horizon while the other seasonality features didn't bring as much to the table while compared to the lags.
+
+A few essential modeling steps were skipped in this post, such as: Model parameter tuning with a Validation set and plotting error with the metric of choice. Those were done behind the scenes and were kept away from the post so that it wouldn't get longer than it should. The purpose was mostly to show the suggested modeling approach in practice, but keep in mind that those steps are an important part of the process.
+
+The full source code as well as a iPython Notebook can be found on this GitHub [here](https://github.com/marciovai/timeseries_ensemble).
+
+Thanks for reading and if you have any trouble implementing this solution or have any feedback in general feel free to leave a comment below or contact me!
