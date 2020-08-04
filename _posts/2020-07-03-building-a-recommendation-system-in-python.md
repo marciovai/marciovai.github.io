@@ -69,7 +69,7 @@ It's important to note that even though the dataset we will be using is comprise
 
 Without further ado let's get to it!
 
-## Development
+## Implementation
 
 ### Preparing the data
 Let's start buy getting our MovieLens 100K Dataset.
