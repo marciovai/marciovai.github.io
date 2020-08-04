@@ -61,7 +61,7 @@ The dataset we will be using is the [Sunspot](http://www.sidc.be/silso/datafiles
 It goes from 1749-01-01 to 1983-12-01 aggregated in months, giving us a total of 2820 observations, which would be a pretty decent sized dataset but remember that its about an astronomical event. Regardless, its more than enough for us to explore, build our model ensemble and measure the accuracy later on.
 
 {:refdef: style="text-align: center;"}
-![Sunspot Dataset](/images/sunspot_dataset.jpg)
+![Sunspot Dataset](/images/sunspot_dataset.JPG)
 {: refdef}
 
 As you can see the data is somewhat noisy and with high variance, it also has varying seasonal effects. This proves for an interesting test for our modeling approach, since the model needs to learn to capture the different seasonal effects present in the data in order to give a proper forecast.
@@ -69,7 +69,7 @@ As you can see the data is somewhat noisy and with high variance, it also has va
 Below is a de-noised version of the same plot using a Moving Average with a window of 12, transforming the data more or less in an early plot. 
 
 {:refdef: style="text-align: center;"}
-![Sunspot with Rolling Average](/images/sunspot_dataset_average.jpg)
+![Sunspot with Rolling Average](/images/sunspot_dataset_average.JPG)
 {: refdef}
 
 ## Data preprocessing
@@ -255,11 +255,11 @@ data_test_dates['label'] = data_cp[(data_cp['date'] >= start_forecast) & (data_c
 Comparing our forecast (```Sunspots_trended```) and the actual labels
 
 {:refdef: style="text-align: center;"}
-![Results 1](/images/results_1.jpg)
+![Results 1](/images/results_1.JPG)
 {: refdef}
 
 {:refdef: style="text-align: center;"}
-![Results 2](/images/results_2.jpg)
+![Results 2](/images/results_2.JPG)
 {: refdef}
 
 As we can see the model did a pretty good job overall in modeling the series, including the seasonality observed near the end of the last months.
@@ -278,5 +278,5 @@ for index, model in models_dict.items():
 ```
 
 {:refdef: style="text-align: center;"}
-![Results 2](/images/results_2.jpg)
+![Results 2](/images/results_2.JPG)
 {: refdef}
