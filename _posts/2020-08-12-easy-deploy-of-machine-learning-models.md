@@ -41,7 +41,33 @@ The model outputs a probability between 0 and 1 based on the input features gene
 
 This is a very simple approach towards modeling Sentiment and it usually lags behind other simple approaches like [Naive Bayes](https://web.stanford.edu/~jurafsky/slp3/4.pdf). Also there are other more complete solutions using [Google word2vec](https://code.google.com/archive/p/word2vec/) which are capable of capturing semantic representations and achieve much better performance.
 
-Since the objective of this blog post is to show how to deploy an algorithm rather than develop and improve it, I kept things as simpler as possible. If you are working on a similar problem it should be easy to change the Logistic Regression being used for a Neural Network of Word Vectors and still keep the same project structure for deployment, except of course that a few more steps might be needed depending on the strategy being used.
+Since the objective of this blog post is to show how to deploy an algorithm rather than develop and improve it, I kept things as simple as possible. If you are working on a similar problem it should be easy to change the Logistic Regression being used for a Neural Network or Vector Spaces and still keep the same project structure for deployment, except of course that a few more steps might be needed depending on the strategy being used.
 
 For referencing, check [this Notebook](https://github.com/marciovai/Twitter-Sentiment-10K/blob/master/Tweet_Sentiment_Analysis_Logistic_Regression.ipynb) to see how the model was developed.
 
+## Setting up the environment
+The first step of the deployment is to setup an environment where both the model and the API will run, ideally it should be isolated from the OS of the server so that reproducibility becomes something guaranteed. For the rescue comes **Docker** which does exactly that. Docker is great since it works on the Infrastructure-as-Code paradigm, so the file used to define the environment also becomes documentation and a way to rebuild the environment whenever necessary. Here we will keep things as simple as possible so that building the environment inside the container becomes a solution, not a problem. 
+I will leave here a tip for working with Docker: If some particular set of scripts doesn't seen to be working no matter what, you are probably trying to do something in a way that Docker wasn't designed for, try searching for similar solutions to the problem. Things should be very streamlined when using Docker to build an environment.
+
+Below is the Dockerfile that will be used to build the environment.
+
+```Docker
+FROM ubuntu:xenial
+
+# update environment packages
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install software-properties-common -y 
+
+# install pip
+RUN apt-get install -y python3-pip
+RUN pip3 install --upgrade pip
+
+# copy python packages list to container and install
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+
+# create folder where project folder will be attached to during RUN
+RUN mkdir external_lib
+```
+
+Nothing out of the extraordinary here, just updating the libraries
