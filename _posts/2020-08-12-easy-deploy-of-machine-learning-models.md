@@ -70,7 +70,7 @@ RUN pip install -r requirements.txt
 RUN mkdir external_lib
 ```
 
-Nothing out of the extraordinary here, just updating the libraries, installing pip and all the Python libraries will be used from ```requirements.txt```. One thing worth noting here is the ```COPY``` command, which basically takes the file from the local directory where the ```Dockerfile``` being executed is located and copies it to the container.
+Nothing out of the extraordinary here, just updating the libraries, installing pip and all the Python libraries will be used from ```requirements.txt```, so make sure to map your environment packages inside it. One thing worth noting here is the ```COPY``` command, which basically takes the file from the local directory where the ```Dockerfile``` being executed is located and copies it to the container.
 
 To build the container call the following command on a terminal where Docker is 
 acessible from. This will go through the container definition and build it as ```model_api```.
@@ -95,16 +95,13 @@ Method below is the main API component - It's the method called when it receives
 ```Python
 @app.route('/api/v1/7Aja2ByCyQ4rMBqA/predict', methods=['POST'])
 def predict_tweet():
-    # Called when API receives a POST request. It expects a json with
-    # a dictionary of tweets, then it calls the model module to generate
-    # predictios and returns it
+    # Called when API receives a POST request. It expects a json with input data, then it calls the model module to generate predictions and returns it
 
     # Parameters:
-    #    json (dict): request dict, should contain ids as keys and tweets
-    # as values
+    #    json (dict): request dict, should contain input data
 
     # Returns:
-    #    dict (json): where the key is tweet id and value the prediction
+    #    dict (json): model predictions
 
     try:
         # get json from request
@@ -112,21 +109,21 @@ def predict_tweet():
         
         # check if request sent an empty payload
         if json != {}:
-            # get each id and tweet from request
-            ids = []
-            tweets = []
-            for id, tweet in json.items():
-                ids.append(id)
-                tweets.append(tweet)
+            # get each key and values from request
+            keys = []
+            values = []
+            for key, value in json.items():
+                keys.append(key)
+                values.append(value)
 
             # call model predict
-            result = predict(tweets) 
+            result = run(values) 
             
-            # generate response json
+            # generate response json for empty and non-empty results
             if result == []: 
-                result = empty_response(ids)
+                result = empty_response(keys)
             else:
-                result = prepare_response(ids, result)
+                result = prepare_response(keys, result)
         else:
             raise Exception('')
 
@@ -142,7 +139,7 @@ The long string in the middle is used so that the URL becomes dynamic, since the
 - Deploy it on a server that is inside a private network, like a VPC for example, so that only the IPs you own have access to it; or
 - Implement a auto refresh of the API URL token, so that every couple of hours or days it changes.
 
-It's also a good idea to add some extra methods to the API to preprocess the different types of responses and errors that are expected to occur. Feel free to refer to the ones I used [here](https://github.com/marciovai/tweet_sentiment_predictor_api).
+It's also a good idea to add some extra methods to the API to preprocess the different types of responses and errors that are expected to occur, like I did with ```empty_response()``` and ```prepare_response()```. Feel free to refer to the ones I used [here](https://github.com/marciovai/tweet_sentiment_predictor_api).
 
 ## WSGI
 
@@ -176,5 +173,48 @@ if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=False, ssl_context=context, threaded=True)
 ```
 
-The Flask app defined before will be imported and executed with the passed parameters. Once gunicorn is called on the command-line, it will chain this Flask process inside it's threads to encapsulate the Flask app.
+The Flask app defined before will be imported and executed with the passed parameters, notice that we are passing the files related to the certificate generated before. Once gunicorn is called on the command-line, it will chain this Flask process inside it's threads to encapsulate the Flask app.
 
+The only thing missing now is a way to call gunicorn from inside the container once it starts. There many ways of doing that, the below method is my personal preference but feel free to do it any way you prefer.
+
+Once the container is called, it will execute the ```api-start``` command inside a [Makefile](https://www.gnu.org/software/make/manual/html_node/Introduction.html), which itself calls the command that starts gunicorn. The definition of the file can be the following.
+
+```Makefile
+api-start: 
+	gunicorn --certfile server.crt --keyfile server.key -b 0.0.0.0:5000 --log-level=debug --workers=2 wsgi:app
+```
+
+## Adding Model logic
+
+All the pieces are coming together, now let's take a look at how to add the code related to the model, like preprocessing data, generating forecast and so on. It's a good idea to keep the code from the model separate from the API for readability, this will also help if in the future you decide to run both on different Docker containers or servers.
+
+Below is an example of how the ```model.py``` will likely be structured as, probably most of the code in it will be ready from the Jupyter Notebook or whatever environment the model was developed on.
+
+```Python
+def load_artifacts(item):
+    # Returns the requested artifact
+    # Possible artifacts are: serialized model, file with
+    # model weights.
+    return artifact
+
+def preprocess_data(data):
+    # Performs all the preprocessing steps before feeding
+    # the data to the model for prediction
+    return preprocessed_data
+
+def predict(data):
+    # Predicts on preprocessed data passed to the method
+    return prediction
+
+def process_model_output(prediction):
+    # Preprocesses the forecast from the model so that
+    # it can be easily handled by the API before returning
+    # the response
+    return preprocessed_prediction
+
+def run(data):
+    # Main module method, calls all methods above as pipeline
+    return preprocessed_prediction
+```
+
+The ```load_artifacts()``` is for loading the model that was trained, alongside any other objects that might be necessary for reproducibility like sklearn preprocessing models and so on. One possible way of using it is to simply put the artifacts on the same repository that the project is, so that it can be loaded by just referring to the relative path ```./artifact.pickle```. It's also possible to store them on a AWS S3 for example, but then extra logic will be necessary to download the files and put them in the same directory that the rest of the files are.
