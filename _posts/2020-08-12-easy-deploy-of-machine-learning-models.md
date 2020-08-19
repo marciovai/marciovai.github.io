@@ -46,7 +46,7 @@ Since the objective of this blog post is to show how to deploy an algorithm rath
 For referencing, check [this Notebook](https://github.com/marciovai/Twitter-Sentiment-10K/blob/master/Tweet_Sentiment_Analysis_Logistic_Regression.ipynb) to see how the model was developed.
 
 ## Setting up the environment
-The first step of the deployment is to setup an environment where both the model and the API will run, ideally it should be isolated from the OS of the server so that reproducibility becomes something guaranteed. For the rescue comes **Docker** which does exactly that. Docker is great since it works on the Infrastructure-as-Code paradigm, so the file used to define the environment also becomes documentation and a way to rebuild the environment whenever necessary. Here we will keep things as simple as possible so that building the environment inside the container becomes a solution, not a problem. 
+The first deployment step is to setup an environment where both the model and the API will run, ideally it should be isolated from the server OS so that reproducibility becomes guaranteed. For the rescue comes **Docker** which does exactly that. Docker is great since its build with the Infrastructure-as-Code paradigm in mind, so the file used to define the environment also becomes documentation and a way to rebuild the environment whenever necessary. Here we will keep things as simple as possible so that building the environment inside the container becomes a solution, not a problem. 
 I will leave here a tip for working with Docker: If some particular set of scripts doesn't seen to be working no matter what, you are probably trying to do something in a way that Docker wasn't designed for, try searching for similar solutions to the problem. Things should be very streamlined when using Docker to build an environment.
 
 Below is the Dockerfile that will be used to build the environment.
@@ -70,4 +70,111 @@ RUN pip install -r requirements.txt
 RUN mkdir external_lib
 ```
 
-Nothing out of the extraordinary here, just updating the libraries
+Nothing out of the extraordinary here, just updating the libraries, installing pip and all the Python libraries will be used from ```requirements.txt```. One thing worth noting here is the ```COPY``` command, which basically takes the file from the local directory where the ```Dockerfile``` being executed is located and copies it to the container.
+
+To build the container call the following command on a terminal where Docker is 
+acessible from. This will go through the container definition and build it as ```model_api```.
+
+```bash
+docker build -t model_api:latest .
+```
+
+## API
+For the API, the framework used is [Flask](https://flask.palletsprojects.com/en/1.1.x/api/) which is great for building production ready, but yet simple APIs in Python. Since The one being built here is relatively simple, configuration won't take long plus the source code will be easy to understand. 
+
+The code below instantiates a Flask app on ```api.py```  and adds it to the context of the module where it is located. Notice that we set Debug Mode to ```False``` since we want to use it in a production server.
+
+```Python
+# setup flask app
+app = flask.Flask(__name__)
+app.config["DEBUG"] = False
+```
+
+Method below is the main API component - It's the method called when it receives a ```POST``` request from the client, here the route will be ```/api/v1/7Aja2ByCyQ4rMBqA/predict```. 
+
+```Python
+@app.route('/api/v1/7Aja2ByCyQ4rMBqA/predict', methods=['POST'])
+def predict_tweet():
+    # Called when API receives a POST request. It expects a json with
+    # a dictionary of tweets, then it calls the model module to generate
+    # predictios and returns it
+
+    # Parameters:
+    #    json (dict): request dict, should contain ids as keys and tweets
+    # as values
+
+    # Returns:
+    #    dict (json): where the key is tweet id and value the prediction
+
+    try:
+        # get json from request
+        json = request.get_json()
+        
+        # check if request sent an empty payload
+        if json != {}:
+            # get each id and tweet from request
+            ids = []
+            tweets = []
+            for id, tweet in json.items():
+                ids.append(id)
+                tweets.append(tweet)
+
+            # call model predict
+            result = predict(tweets) 
+            
+            # generate response json
+            if result == []: 
+                result = empty_response(ids)
+            else:
+                result = prepare_response(ids, result)
+        else:
+            raise Exception('')
+
+        return jsonify(result)
+    except Exception as e:
+        app.logger.info('Application Error while processing request')
+        abort(400)
+```
+
+The long string in the middle is used so that the URL becomes dynamic, since there will be no authentication behind the API, this section can be used as a token. For that reason, if you want to deploy this in production I recommend one of the following:
+
+- Implement a proper authentication mechanism using the libraries Flask already has; or
+- Deploy it on a server that is inside a private network, like a VPC for example, so that only the IPs you own have access to it; or
+- Implement a auto refresh of the API URL token, so that every couple of hours or days it changes.
+
+It's also a good idea to add some extra methods to the API to preprocess the different types of responses and errors that are expected to occur. Feel free to refer to the ones I used [here](https://github.com/marciovai/tweet_sentiment_predictor_api).
+
+## WSGI
+
+Before moving on, there is one more component that needs to be presented which is [gunicorn](https://gunicorn.org/), a powerful production-ready WSGI in Python. The WSGI will be in charge of handling the actual HTTPS connections received from the client to the API and forwarding it the Python code wrote to process the input data. 
+
+The Main benefits of using gunicorn as a WSGI are: 1) It's scalable with support to multithreading out of the box 2) We can use it to process encrypted HTTPS requests without the need of having a proxy like NGINX or Apache.
+
+Without HTTPS encryption, the data contained in the requests to and from the API would be traveling through the web as raw text, making it very easy to be captured by someone ill-intentioned.
+
+Have said that, in order to use HTTPS we need to have a _Certificate_ so that we can encrypt the data we send, and only the receiver can decrypt it. Assuming a UNIX-based terminal and OpenSSL is installed, the command below will create a ```server.key``` and ```server.crt``` after following the on-screen instructions.
+
+```bash
+openssl req -newkey rsa:2048 -nodes -keyout server.key -x509 -days 365 -out server.crt
+```
+
+Since this is only an example it's perfectly fine to use a self signed certificate (or if it's running inside a private network). Otherwise, I highly encourage getting one from a trusted authority.
+
+With the certificate and keyfile to encrypt requests at hand, there is one more step that needs to be done to configure gunicorn so that it can be used by Flask.
+
+The way process will be chained to run the entire API is the following: 1) gunicorn starts as a system-wide process 2) gunicorn starts the Flask app to run on the processes encapsulated by it.
+
+For this to work, we need to pass the API context to gunicorn once it starts. The code snippet below defines the app context on ```wsgi.py``` that the WSGI needs to work.
+
+```Python
+from api import app
+
+# this file is used to pass the app context to WSGI Gunicorn
+
+if __name__ == "__main__":
+    context = ('server.crt', 'server.key')
+    app.run(host='0.0.0.0', debug=False, ssl_context=context, threaded=True)
+```
+
+The Flask app defined before will be imported and executed with the passed parameters. Once gunicorn is called on the command-line, it will chain this Flask process inside it's threads to encapsulate the Flask app.
+
