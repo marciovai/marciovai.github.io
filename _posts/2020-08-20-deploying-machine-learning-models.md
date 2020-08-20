@@ -31,7 +31,9 @@ The client will send a tweet or a set of tweets inside a JSON on the request bod
 ![Twitter Sentiment Analysis](/images/tweet_sentiment_analysis.jpg)
 {: refdef}
 
-Before reaching the model, each tweet goes through two steps: 1) Preprocessing following the traditional NLP pipeline which includes: removal of URLs, removal of punctuation, tokenization, removal of stop words, stemming and case-folding.
+Before reaching the model, each tweet goes through two steps: 
+1) Preprocessing following the traditional NLP pipeline which includes: removal of URLs, removal of punctuation, tokenization, removal of stop words, stemming and case-folding.
+
 2) Two features are created based on word frequencies, that is, for each word that appear in the preprocessed tweet, they are summed based on how many times it appeared on both positive and negative tweets.
 
 After processed two features are created, which are the total counts of word frequencies for positive and negative words in the document.
