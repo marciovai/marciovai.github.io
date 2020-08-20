@@ -50,7 +50,7 @@ I will leave here a tip for working with Docker: If some particular set of scrip
 
 Below is the Dockerfile that will be used to build the environment.
 
-```Docker
+```docker
 FROM ubuntu:xenial
 
 # update environment packages
@@ -83,7 +83,7 @@ For the API, the framework used is [Flask](https://flask.palletsprojects.com/en/
 
 The code below instantiates a Flask app on ```api.py```  and adds it to the context of the module where it is located. Notice that we set Debug Mode to ```False``` since we want to use it in a production server.
 
-```Python
+```python
 # setup flask app
 app = flask.Flask(__name__)
 app.config["DEBUG"] = False
@@ -91,7 +91,7 @@ app.config["DEBUG"] = False
 
 Method below is the main API component - It's the method called when it receives a ```POST``` request from the client, here the route will be ```/api/v1/7Aja2ByCyQ4rMBqA/predict```. 
 
-```Python
+```python
 @app.route('/api/v1/7Aja2ByCyQ4rMBqA/predict', methods=['POST'])
 def predict_tweet():
     # Called when API receives a POST request. It expects a json with input data, then it calls the model module to generate predictions and returns it
@@ -162,7 +162,7 @@ The way process will be chained to run the entire API is the following: 1) gunic
 
 For this to work, we need to pass the API context to gunicorn once it starts. The code snippet below defines the app context on ```wsgi.py``` that the WSGI needs to work.
 
-```Python
+```python
 from api import app
 
 # this file is used to pass the app context to WSGI Gunicorn
@@ -178,7 +178,7 @@ The only thing missing now is a way to call gunicorn from inside the container o
 
 Once the container is called, it will execute the ```api-start``` command inside a [Makefile](https://www.gnu.org/software/make/manual/html_node/Introduction.html), which itself calls the command that starts gunicorn. The definition of the file can be the following.
 
-```Makefile
+```makefile
 api-start: 
 	gunicorn --certfile server.crt --keyfile server.key -b 0.0.0.0:5000 --log-level=debug --workers=2 wsgi:app
 ```
@@ -189,7 +189,7 @@ All the pieces are coming together, now let's take a look at how to add the code
 
 Below is an example of how the ```model.py``` will likely be structured as, probably most of the code in it will be ready from the Jupyter Notebook or whatever environment the model was developed on.
 
-```Python
+```python
 def load_artifacts(item):
     # Returns the requested artifact
     # Possible artifacts are: serialized model, file with
@@ -226,7 +226,7 @@ Once all the steps above are finished the project is ready to be deployed. Since
 
 First make sure that all the necessary files from the project are in the same folder that the Dockerfile is. One possible structure is as follows (and is actually the one I used on the [sample project](https://github.com/marciovai/tweet_sentiment_predictor_api)).
 
-```Markdown
+```markdown
 ├── artifacts
 │   ├── artifact1.pickle
 │   └── artifact2.pickle
