@@ -1,9 +1,8 @@
 ---
 layout: post
 title: Deploying Machine Learning Models
-featured-img: plansee
+featured-img: gurtnellen
 comments: true
-published: false
 ---
 
 # Introduction
