@@ -218,3 +218,87 @@ def run(data):
 ```
 
 The ```load_artifacts()``` is for loading the model that was trained, alongside any other objects that might be necessary for reproducibility like sklearn preprocessing models and so on. One possible way of using it is to simply put the artifacts on the same repository that the project is, so that it can be loaded by just referring to the relative path ```./artifact.pickle```. It's also possible to store them on a AWS S3 for example, but then extra logic will be necessary to download the files and put them in the same directory that the rest of the files are.
+
+One tip I will give here is to debug all the code from ```model.py``` to make sure that the entire pipeline works properly. Once that's done, all that's left to do is defining what the input to this module, which is passed by the API will look like (a dict, a list of lists, a Dataframe). Then just add the proper handlers on the model class for the input and follow the model pipeline. By testing things in these modularized way the development becomes a lot easier. So make sure that your model pipeline works after taking the input from the API, then fix how the API takes this output and sends it back to the client inside a JSON.
+
+## Building the Container
+
+Once all the steps above are finished the project is ready to be deployed. Since we are using Docker and the Container was already defined, this process becomes very simple. 
+
+First make sure that all the necessary files from the project are in the same folder that the Dockerfile is. One possible structure is as follows (and is actually the one I used on the [sample project](https://github.com/marciovai/tweet_sentiment_predictor_api)).
+
+```Markdown
+├── artifacts
+│   ├── artifact1.pickle
+│   └── artifact2.pickle
+├── api.py
+├── model.py
+├── wsgi.py
+├── Dockerfile
+├── Makefile
+├── requirements.txt
+├── server.crt
+└── server.key
+```
+
+This folder structure is necessary since we are building the container by copying all the contents from the current folder where the Dockerfile is, so if you place files in a different hierarchy, make sure to reflect that when importing/reading the files.
+
+*Important - Remember to add both ```server.crt``` and ```server.key``` to gitignore in case you are storing the project on a public Git repository and store it in a safe place where only trusted people have access to it, you certainly don't want the internet having free access to a certificate file signed with your credentials.*
+
+Now everything is ready to build the container and start the application!
+
+Run the command below on a terminal where Docker is acessible from:
+
+```bash
+docker run -it -v /path/to/model_api/:/external_lib/ -p 5000:5000 --network="host" model_api sh -c 'cd external_lib && make api-start'
+```
+
+The command will perform the following actions while running the container:
+1) Mount a virtual volume inside the container by mapping ```/path/to/model_api/``` which is where the project is located, to ```/external_lib/``` which is a folder inside the container. So basically the server folder becomes available to the container as well. The main advantage of doing it this way is that when the source code changes, there will be no need to rebuild the container, just restart the container and it will use the latest version of the project.
+
+2) Map port 5000 from the server to container port 5000 with ```-p 5000:5000```, so every connection made to this port in the server get's tunneled the container as well, and is also the port that the API will respond to.
+
+3) Share the same network layer and IP between the server and container with ```--network="host"```, this is good because then all requests made to the server on the ports where the container listens too will automatically forward them to the container as well.
+
+4) Execute a shell command inside the container with ```sh -c 'cd external_lib && make api-start'```, which will go into the folder where the project is and call the ```Makefile``` to start the API.
+
+Upon running the command you should see gunicorn output from the container, similar to the following:
+
+```bash
+[2020-08-20 14:09:48 +0000] [7] [INFO] Starting gunicorn 20.0.4
+[2020-08-20 14:09:48 +0000] [7] [DEBUG] Arbiter booted
+[2020-08-20 14:09:48 +0000] [7] [INFO] Listening at: https://0.0.0.0:5000 (7)
+[2020-08-20 14:09:48 +0000] [7] [INFO] Using worker: sync
+[2020-08-20 14:09:48 +0000] [10] [INFO] Booting worker with pid: 10
+[2020-08-20 14:09:48 +0000] [11] [INFO] Booting worker with pid: 11
+[2020-08-20 14:09:48 +0000] [7] [DEBUG] 2 workers
+```
+
+Notice that here there are only 2 workers being spawned by the framework, feel free to change this accordingly to the needs of your application and based on how many cores the server has by updating the ```Makefile```.
+
+Now let's make a call to the API and test if it works.
+
+```bash
+curl -i -k -H "Accept: application/json" -H "Content-Type: application/json" -X POST │ https://127.0.0.1:5000/api/v1/7Aja2ByCyQ4rMBqA/predict -d @payload.json
+```
+
+The command above will use curl to send a ```POST``` to the API and pass ```payload.json``` as the body. This file should contain the input data that will be passed to the model for making a prediction.
+
+If everything works well, the expected response should be a status 200 OK, as shown below. In this case the model behind the API is a Sentiment predictor and the input was a set of 8 Tweets.
+
+```bash
+HTTP/1.1 200 OK
+Server: gunicorn/20.0.4
+Date: Thu, 20 Aug 2020 14:33:40 GMT
+Connection: close
+Content-Type: application/json
+Content-Length: 122
+
+{"1":"Negative","2":"Negative","3":"Negative","4":"Negative","5":"Negative","6":"Negative","7":"Positive","8":"Positive"}
+```
+
+If yours doesn't reply as expected, try debugging to see what could be the cause of the problem.
+
+The full source code can be found [here](https://github.com/marciovai/tweet_sentiment_predictor_api).
+
+Thanks for reading and if you have any trouble implementing this solution or have any feedback in general feel free to leave a comment below or contact me!
