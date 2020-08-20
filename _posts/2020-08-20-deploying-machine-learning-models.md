@@ -45,7 +45,8 @@ Since the objective of this blog post is to show how to deploy an algorithm rath
 For referencing, check [this Notebook](https://github.com/marciovai/Twitter-Sentiment-10K/blob/master/Tweet_Sentiment_Analysis_Logistic_Regression.ipynb) to see how the model was developed.
 
 ## Setting up the environment
-The first deployment step is to setup an environment where both the model and the API will run, ideally it should be isolated from the server OS so that reproducibility becomes guaranteed. For the rescue comes **Docker** which does exactly that. Docker is great since its build with the Infrastructure-as-Code paradigm in mind, so the file used to define the environment also becomes documentation and a way to rebuild the environment whenever necessary. Here we will keep things as simple as possible so that building the environment inside the container becomes a solution, not a problem. 
+The first deployment step is to setup an environment where both the model and the API will run, ideally it should be isolated from the server OS so that reproducibility becomes guaranteed. For the rescue comes **Docker** which does exactly that. Docker is great since its build with the Infrastructure-as-Code paradigm in mind, so the file used to define the environment also becomes documentation and a way to rebuild the environment whenever necessary. Here we will keep things as simple as possible so that building the environment inside the container becomes a solution, not a problem.
+
 I will leave here a tip for working with Docker: If some particular set of scripts doesn't seen to be working no matter what, you are probably trying to do something in a way that Docker wasn't designed for, try searching for similar solutions to the problem. Things should be very streamlined when using Docker to build an environment.
 
 Below is the Dockerfile that will be used to build the environment.
