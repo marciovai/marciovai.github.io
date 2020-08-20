@@ -253,6 +253,7 @@ docker run -it -v /path/to/model_api/:/external_lib/ -p 5000:5000 --network="hos
 ```
 
 The command will perform the following actions while running the container:
+
 1) Mount a virtual volume inside the container by mapping ```/path/to/model_api/``` which is where the project is located, to ```/external_lib/``` which is a folder inside the container. So basically the server folder becomes available to the container as well. The main advantage of doing it this way is that when the source code changes, there will be no need to rebuild the container, just restart the container and it will use the latest version of the project.
 
 2) Map port 5000 from the server to container port 5000 with ```-p 5000:5000```, so every connection made to this port in the server get's tunneled the container as well, and is also the port that the API will respond to.
