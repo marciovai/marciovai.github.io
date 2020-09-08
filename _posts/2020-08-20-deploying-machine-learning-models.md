@@ -262,9 +262,7 @@ The command will perform the following actions while running the container:
 
 2) Map port 5000 from the server to container port 5000 with ```-p 5000:5000```, so every connection made to this port in the server get's tunneled the container as well, and is also the port that the API will respond to.
 
-3) Share the same network layer and IP between the server and container with ```--network="host"```, this is good because then all requests made to the server on the ports where the container listens too will automatically forward them to the container as well.
-
-4) Execute a shell command inside the container with ```sh -c 'cd external_lib && make api-start'```, which will go into the folder where the project is and call the ```Makefile``` to start the API.
+3) Execute a shell command inside the container with ```sh -c 'cd external_lib && make api-start'```, which will go into the folder where the project is and call the ```Makefile``` to start the API.
 
 Upon running the command you should see gunicorn output from the container, similar to the following:
 
