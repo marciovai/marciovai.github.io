@@ -253,7 +253,7 @@ Now everything is ready to build the container and start the application!
 Run the command below on a terminal where Docker is acessible from:
 
 ```bash
-docker run -it -v /path/to/model_api/:/external_lib/ -p 5000:5000 --network="host" model_api sh -c 'cd external_lib && make api-start'
+docker run -it -v /path/to/model_api/:/external_lib/ -p 5000:5000 model_api sh -c 'cd external_lib && make api-start'
 ```
 
 The command will perform the following actions while running the container:
