@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Deploying Machine Learning Models
+title: Deploying Machine Learning with Python and Docker
 featured-img: gurtnellen
 comments: true
 ---
