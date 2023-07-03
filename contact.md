@@ -4,7 +4,7 @@ title: Contact
 permalink: /contact/
 ---
 
-Got anything to share ? Reach out to me via the form below.
+Got anything to share ? Reach out via the form below.
 
 ### Contact
 

@@ -17,11 +17,10 @@ social:
 # THEME SETTINGS
 navigation: # Navigation links
   - {name: 'Home', link: '/'}
-  - {name: 'About', link: '/about'}
   - {name: 'Contact', link: '/contact'}
 
 tagline: >
-  Software and Machine Learning Engineering
+  welcome to my blog
 
 hero_img: posts/sleek_lg.jpg # Main background image: use the path from /assets/img/ => This will output /assets/img/posts/sleek_lg.jpg
 
