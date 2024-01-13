@@ -1,15 +1,18 @@
 ---
 layout: post
-title: Deploying Machine Learning with Python and Docker
+title: Machine Learning powered API with Docker
 featured-img: gurtnellen
 comments: true
 ---
 
 # Introduction
 
-Deploying Machine Learning algorithms into production is rarely a straightforward task. Usually there are multiple variables to be weighted like what type of algorithm, what library was used, how large is the model, how it's predictions are going to be consumed (batch or online inference), what are the business goals, just to name a few. While there is no right or wrong way of doing it some solutions can get quite complex with many steps in the pipeline and different technologies involved, which is one of the reasons for many companies hiring Machine Learning Engineers and Data Scientists, while the first takes care of the deployment and the tech stack and the later of making models. In this post I will present a simple way of deploying models using Docker and Python which works with any library and most platforms, whether you are using AWS, GCP, Azure, bare metal or your local machine.
+The goal of this article is to walk through developing a Dockerfile which can be used for building a Docker image that can be deployed to a variety of tools such as Kubernetes, Azure App Service, Google Cloud App Engine and Amazon ECS.
 
-One of the main advantages of having a simple deploy is that it's a lot easier to debug since there are fewer components involved and it also takes less time to setup and get going. On the other hand the disadvantage is the lack of automation and scalability. But don't get me wrong here, you will still be able to use this deployment methodology for the majority of use cases.
+Deploying Machine Learning algorithms into production is rarely a straightforward task. Usually there are multiple variables to be weighted like what type of algorithm, what library was used for the model, how large is the model, how it's predictions are going to be consumed (batch or online inference), what are the business goals, just to name a few. While there is no right or wrong way of doing it some solutions can get quite complex with many steps in the pipeline and different technologies involved, which is one of the reasons for many companies hiring Machine Learning Engineers and Data Scientists, while the first takes care of the deployment and the tech stack and the later of making models. In this post I will present a simple way of deploying models using Docker and Python which works with any library and most platforms, whether you are using AWS, GCP, Azure, bare metal or your local machine.
+
+One of the main advantages of having a simple deploy script is that it's a lot easier to debug since there are fewer components involved and it also takes less time to setup and get going. On the other hand the disadvantage is the lack of automation and scalability. But don't get me wrong here, you will still be able to use this deployment methodology for a number of cases
+
 
 # Architecture
 
